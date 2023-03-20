@@ -4,7 +4,7 @@ const controller = require("../controllers/folder");
 const authWare = require("../middleware/roleMiddleware");
 
 router.post("/folders", authWare([2, 3, 4]), controller.create);
-router.get("/folders", authWare([2, 3, 4]), controller.get);
+router.get("/folders", authWare([1, 2, 3, 4]), controller.get);
 router.get("/folderspages", authWare([2, 3, 4]), controller.getPages);
 router.get("/folders/:id", authWare([2, 3, 4]), controller.getOne);
 router.put("/folders/:id", authWare([2, 3, 4]), controller.update);

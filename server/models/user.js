@@ -1,11 +1,12 @@
 const { DataTypes } = require("sequelize");
 const db = require("../../db");
 
-const bcrypt = require("bcrypt");
-const salt = 3;
-
 const OrganizationModel = require("./organization");
 const RoleModel = require("./role");
+const AreaModel = require("./area");
+
+const bcrypt = require("bcrypt");
+const salt = 3;
 
 const User = db.define(
   "users",
@@ -65,13 +66,13 @@ const User = db.define(
     },
     roleId: {
       type: DataTypes.UUID,
-      allowNull: false,
       references: {
         model: RoleModel,
         key: "id",
       },
     },
     foldersId: { type: DataTypes.ARRAY(DataTypes.UUID) },
+    areasId: { type: DataTypes.ARRAY(DataTypes.UUID) },
     isEmployee: {
       type: DataTypes.BOOLEAN,
     },
@@ -87,8 +88,12 @@ const User = db.define(
 
 User.belongsTo(OrganizationModel);
 User.belongsTo(RoleModel);
+User.belongsToMany(AreaModel, { through: "usersareas" });
 
 OrganizationModel.hasMany(User);
 RoleModel.hasMany(User);
+AreaModel.belongsToMany(User, { through: "usersareas" });
+
+/* const Model = withCache(User); */
 
 module.exports = User;

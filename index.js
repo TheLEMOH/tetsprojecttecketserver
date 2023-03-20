@@ -22,6 +22,7 @@ const message = require("./server/routers/message");
 const roles = require("./server/routers/role");
 const statistic = require("./server/routers/statistic");
 const folder = require("./server/routers/folder");
+const step = require("./server/routers/step");
 const init = require("./server/routers/init");
 
 app.use("/api", userRouters);
@@ -38,6 +39,7 @@ app.use("/api", message);
 app.use("/api", roles);
 app.use("/api", statistic);
 app.use("/api", folder);
+app.use("/api", step);
 app.use("/api", init);
 
 app.use((err, req, res, next) => {

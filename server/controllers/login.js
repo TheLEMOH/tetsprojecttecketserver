@@ -56,7 +56,7 @@ class Controller {
         res.json(user);
       }
     } catch (e) {
-      res.status(400).json(null);
+      res.status(403).json(null);
     }
   }
 }

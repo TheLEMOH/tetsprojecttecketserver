@@ -39,7 +39,7 @@ const includeOne = [
   {
     model: UserModel,
     as: "creator",
-    attributes: ["surname", "name", "patronymic", "subdivision", "position", "cabinet", "address", "phone", "phoneWork", "email"],
+    attributes: ["surname", "name", "patronymic", "subdivision", "position", "cabinet", "address", "phone", "phoneWork", "email", "organizationId"],
     include: [
       {
         model: OrganizationModel,
@@ -73,7 +73,9 @@ class Controller {
         const headOrg = await OrganizationModel.findOne({
           where: { isHead: true },
         });
+
         organizationId = headOrg.id;
+
         step = await StepModel.findOne({
           where: { wayId: wayId, organizationId, stepNumber: 0 },
         });
@@ -82,7 +84,7 @@ class Controller {
       if (system.openId) {
         req.body.statusId = system.openId;
         req.body.wayId = category.wayId;
-        req.body.executorId = step.userId;
+        req.body.executorId = step ? step.userId : null;
         req.body.organizationId = organizationId;
         req.body.priorityId = category.priorityId;
 
@@ -230,7 +232,7 @@ class Controller {
       if (step) {
         const nextExecutor = step.user;
         const userId = step.dataValues.userId;
-        const text = `Заявка передана следующему сотруднику - ${nextExecutor.surname} ${nextExecutor.name} ${nextExecutor.patronymic}`;
+        const text = `Изменен шаг. Заявка передана сотруднику - ${nextExecutor.surname} ${nextExecutor.name} ${nextExecutor.patronymic}`;
         await Model.update({ executorId: userId, stepNumber: nextNumber }, { where: { id } });
         await MessageModel.create({
           ticketId: id,
@@ -265,7 +267,7 @@ class Controller {
       if (step) {
         const nextExecutor = step.user;
         const userId = step.dataValues.userId;
-        const text = `Заявка передана следующему сотруднику - ${nextExecutor.surname} ${nextExecutor.name} ${nextExecutor.patronymic}`;
+        const text = `Изменен шаг. Заявка передана сотруднику - ${nextExecutor.surname} ${nextExecutor.name} ${nextExecutor.patronymic}`;
         await Model.update({ executorId: userId, stepNumber: previousNumber }, { where: { id } });
         await MessageModel.create({
           ticketId: id,
@@ -292,12 +294,14 @@ class Controller {
 
       if (type == "close") {
         await Model.update({ statusId: system.closeId }, { where: { id } });
+
         await MessageModel.create({
           ticketId: id,
           creatorId,
           text: "Заявка закрыта.",
           type: "answer",
         });
+
         await MessageModel.create({
           ticketId: id,
           creatorId,
@@ -308,12 +312,14 @@ class Controller {
 
       if (type == "reject") {
         await Model.update({ statusId: system.rejectId }, { where: { id } });
+
         await MessageModel.create({
           ticketId: id,
           creatorId,
           text: "Заявка отклонена.",
           type: "answer",
         });
+
         await MessageModel.create({
           ticketId: id,
           creatorId,
@@ -331,7 +337,7 @@ class Controller {
   async delete(req, res, next) {
     try {
       const id = req.params.id;
-      const items = await Model.destroy({ where: { id: id } });
+      await Model.destroy({ where: { id: id } });
       res.json({ message: "Заявка удалена" });
     } catch (error) {
       next(error);

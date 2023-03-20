@@ -12,9 +12,10 @@ module.exports = function (roles = [1, 2, 3, 4]) {
 
       if (!token) throw "Пользователь не авторизован";
 
-      const { role } = jwt.verify(token, secret);
+      const { id, role } = jwt.verify(token, secret);
 
       req.role = role;
+      req.clientId = id;
 
       if (roles.includes(role)) next();
       else throw "Пользователь не имеет доступа";

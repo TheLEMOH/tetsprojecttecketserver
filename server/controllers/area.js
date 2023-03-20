@@ -1,31 +1,6 @@
 const AreaModel = require("../models/area");
+const UserModel = require("../models/user");
 const CreateFilter = require("../scripts/filter");
-/* const NodeModel = require('../models/node') */
-
-/* const RecurseCreate = async (tree, nodeId, areaId) => {
-    for (let i = 0, length = tree.length; i < length; i++) {
-        const node = await NodeModel.create({ key: tree[i].key, data: tree[i].data, nodeId, areaId })
-        const values = node.dataValues
-        const parentId = values.id
-        if (tree[i].children.length != 0)
-            await RecurseCreate(tree[i].children, parentId, null)
-    }
-}
-
-const RecurseGet = async (nodeId, areaId) => {
-    const nodes = await NodeModel.findAll({ where: { nodeId, areaId } })
-    if (nodes) {
-        for (let i = 0, length = nodes.length; i < length; i++) {
-            const values = nodes[i].dataValues
-            const nodeId = values.id
-            const children = await RecurseGet(nodeId, null)
-            nodes[i].dataValues.children = children
-        }
-        return nodes
-    }
-    else
-        return null
-} */
 
 class Controller {
   async create(req, res) {
@@ -74,6 +49,17 @@ class Controller {
     res.json(items);
   }
 
+  async getByUser(req, res, next) {
+    try {
+      const clientId = req.clientId;
+      const item = await UserModel.findOne({ where: { id: clientId }, attributes: ["id"], include: [{ model: AreaModel }] });
+      const areas = item.areas;
+      res.json(areas);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getOne(req, res, next) {
     try {
       const id = req.params.id;
@@ -90,7 +76,7 @@ class Controller {
       const items = await AreaModel.update(req.body, { where: { id: id } });
       res.json({ message: "Область обновлена!" });
     } catch (error) {
-      next();
+      next(error);
     }
   }
 

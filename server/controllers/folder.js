@@ -45,7 +45,9 @@ class Controller {
   async update(req, res, next) {
     try {
       const id = req.params.id;
-      await Model.update(req.body, { where: { id: id } });
+      const { name, description, filter } = req.body;
+      const newFilter = CreateFilter(filter);
+      await Model.update({ name, description, filter: newFilter }, { where: { id: id } });
       res.json({ message: "Папка обновлена!" });
     } catch (error) {
       next();

@@ -1,6 +1,8 @@
-const CreateFilter = (obj) => {
-    const filter = Object.fromEntries(Object.entries(obj).filter(([_, v]) => v != null && v != 'null'));
-    return filter
-}
+const { Op } = require("sequelize");
 
-module.exports = CreateFilter
+const CreateFilter = (obj) => {
+  const filter = Object.fromEntries(Object.entries(obj).filter(([_, v]) => v != null && v != "null"));
+  return filter;
+};
+
+module.exports = CreateFilter;

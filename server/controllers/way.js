@@ -4,6 +4,8 @@ const UserModel = require("../models/user");
 const OrganizationModel = require("../models/organization");
 const StepModel = require("../models/step");
 
+const CreateFilter = require("../scripts/filter");
+
 class Controller {
   async create(req, res, next) {
     try {
@@ -28,11 +30,13 @@ class Controller {
 
   async getPages(req, res, next) {
     try {
-      const page = req.query.page;
-      const limit = req.query.limit;
+      const { page, limit, name } = req.query;
       const offset = page * limit;
 
+      const filter = CreateFilter({ name });
+
       const ways = await Model.findAndCountAll({
+        where: filter,
         offset: offset,
         limit: limit,
         order: ["name"],
@@ -49,13 +53,14 @@ class Controller {
       const id = req.params.id;
       const way = await Model.findOne({
         where: { id: id },
-        order: ["name"],
         include: [
           {
             model: OrganizationModel,
             include: [
               {
                 model: StepModel,
+                where: { wayId: id },
+                order: [["stepNumber", "ASC"]],
                 include: [
                   {
                     model: UserModel,
@@ -97,11 +102,12 @@ class Controller {
         await StepModel.update(oldSteps[i], { where: { id: oldSteps[i].id } });
       }
 
+      await Model.update(req.body, { where: { id: id } });
+
       way.addSteps(createdSteps);
       way.removeSteps(deleteSteps);
       way.setOrganizations(req.body.organizations);
 
-      await Model.update(req.body, { where: { id: deleteSteps } });
       await StepModel.destroy({ where: { id: deleteSteps } });
 
       res.json({ message: "Путь обновлен!" });
